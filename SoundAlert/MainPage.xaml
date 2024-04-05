@@ -31,6 +31,8 @@
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" />
+
+            <Button Clicked="Button_Clicked"/>
         </VerticalStackLayout>
     </ScrollView>
 
