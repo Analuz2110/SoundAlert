@@ -19,7 +19,7 @@ namespace SoundAlert
         private MqttClientConnectResult _connectResult;
         private Animation _pulsingAnimation;
         private bool _tratandoMensagem;
-        private double _filtro = 1200;
+        private double _filtro = 1940;
         private static bool _isAlarmActive = false;
         private static Stopwatch _alarmTimer = new Stopwatch();
 
@@ -62,22 +62,43 @@ namespace SoundAlert
                 .Build();
             try
             {
-                _connectResult = await _mqttClient.ConnectAsync(options);
-
-                if (_connectResult.ResultCode == MqttClientConnectResultCode.Success)
+                _mqttClient.ConnectedAsync += async e =>
                 {
-                    Console.WriteLine("Connected to MQTT broker successfully.");
+                    Console.WriteLine("Connected to MQTT broker.");
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        LabelDescricao.Text = "Dispositivo conectado com suceso.";
-                        AbsoluteLayoutConectado.IsVisible = true;
+                        LabelDescricao.Text = "Conectado ao Broker MQTT.";
                     });
+                };
+
+                _mqttClient.DisconnectedAsync += async e =>
+                {
+                    Console.WriteLine("Disconnected from MQTT broker.");
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+
+                    try
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            LabelDescricao.Text = "Dispositivo desconectado.";
+                            AbsoluteLayoutConectado.IsVisible = false;
+                        });
+
+                        
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Reconnect failed.");
+                    }
+                };
 
 
-                    // Subscribe to a topic
-                    await _mqttClient.SubscribeAsync(topic);
+                _connectResult = await _mqttClient.ConnectAsync(options);
 
+                if(_connectResult.ResultCode == MqttClientConnectResultCode.Success)
+                {
+                    var subscribe = await _mqttClient.SubscribeAsync(topic);
 
                     // Callback function when a message is received
                     _mqttClient.ApplicationMessageReceivedAsync += async e =>
@@ -87,27 +108,57 @@ namespace SoundAlert
                             _tratandoMensagem = true;
 
                             string message = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
-                            string[] values = message.Split(';');
-
-
-                            await TrataMensagem(values);
+                            await TrataMensagem(message);
 
                             Console.WriteLine($"Received message: {message}");
 
                             _tratandoMensagem = false;
                         }
-
                     };
+
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        LabelDescricao.Text = "Dispositivo conectado com suceso.";
+                        AbsoluteLayoutConectado.IsVisible = true;
+                    });
                 }
                 else
                 {
                     Console.WriteLine($"Failed to connect to MQTT broker: {_connectResult.ResultCode}");
                 }
 
-                while (true)
-                {
-                    await Task.Delay(1000);  // Adjust the delay as needed
-                }
+                //if (_connectResult.ResultCode == MqttClientConnectResultCode.Success)
+                //{
+                //    Console.WriteLine("Connected to MQTT broker successfully.");
+                  
+                //    // Subscribe to a topic
+                //    await _mqttClient.SubscribeAsync(topic);
+
+                //    // Callback function when a message is received
+                //    _mqttClient.ApplicationMessageReceivedAsync += async e =>
+                //    {
+                //        if (!_tratandoMensagem)
+                //        {
+                //            _tratandoMensagem = true;
+
+                //            string message = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
+                //            await TrataMensagem(message);
+
+                //            Console.WriteLine($"Received message: {message}");
+
+                //            _tratandoMensagem = false;
+                //        }
+                //    };
+                //}
+                //else
+                //{
+                //    Console.WriteLine($"Failed to connect to MQTT broker: {_connectResult.ResultCode}");
+                //}
+
+                //while (true)
+                //{
+                //    await Task.Delay(1000);  // Adjust the delay as needed
+                //}
             }
             catch (Exception ex)
             {
@@ -115,86 +166,105 @@ namespace SoundAlert
             }
         }
 
-        private async Task TrataMensagem(string[] values)
+        private async Task TrataMensagem(string value)
         {
-            double gyroX, gyroY, gyroZ;
-
-            if (_alarmTimer.ElapsedMilliseconds > 15000)
+            try
             {
-                _isAlarmActive = false;
-                _alarmTimer.Stop();
-                _alarmTimer.Reset();
-                Console.WriteLine("AAAAAAAAAAAATESTEAAAAAAAAAAA");
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                if (_alarmTimer.ElapsedMilliseconds > 15000)
                 {
-                    LabelDescricao.Text = "Dispositivo conectado com suceso.";
-                    _pulsingAnimation.Pause();
-                    AbsoluteLayoutIcone.IsVisible = false;
-                    AbsoluteLayoutConectado.IsVisible = true;
-                    Parar.IsVisible = false;
-                });
-
-            }
-
-            if (values.Length >= 3)
-            {
-                gyroX = double.Parse(values[0], CultureInfo.InvariantCulture);
-                gyroY = double.Parse(values[1], CultureInfo.InvariantCulture);
-
-                if ((gyroX > _filtro || gyroX < -_filtro || gyroY > _filtro || gyroY < -_filtro) && !_alarmTimer.IsRunning)
-                {
-                    AcionarAlarme();
+                    _isAlarmActive = false;
+                    _alarmTimer.Stop();
+                    _alarmTimer.Reset();
+                    Console.WriteLine("Alarme acionado a mais de 15 segundos");
 
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        LabelDescricao.Text = "ATENÇÃO: movimento na piscina.";
-                        AbsoluteLayoutConectado.IsVisible = false;
-                        AbsoluteLayoutIcone.IsVisible = true;
-                        Parar.IsVisible = true;
+                        LabelDescricao.Text = "Dispositivo conectado com suceso.";
+                        _pulsingAnimation.Pause();
+                        AbsoluteLayoutIcone.IsVisible = false;
+                        AbsoluteLayoutConectado.IsVisible = true;
+                        Parar.IsVisible = false;
                     });
+                }
 
-                    _isAlarmActive = true;
-                    _alarmTimer.Start();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var faixa = double.Parse(value, CultureInfo.InvariantCulture);
 
-                    Console.WriteLine("ALARME ACIONADO.");
+                    if ((faixa > _filtro + 30 || faixa < _filtro - 30) && !_alarmTimer.IsRunning)
+                    {
+                        AcionarAlarme();
+
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            try
+                            {
+                                LabelDescricao.Text = "ATENÇÃO: ruído detectado.";
+                                AbsoluteLayoutConectado.IsVisible = false;
+                                AbsoluteLayoutIcone.IsVisible = true;
+                                Parar.IsVisible = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.ToString());
+                            }
+                        });
+
+                        _isAlarmActive = true;
+                        _alarmTimer.Start();
+
+                        Console.WriteLine("ALARME ACIONADO.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Invalid message format.");
                 }
             }
-            else
+            catch(Exception ex)
             {
-                Console.WriteLine("Invalid message format.");
+                Console.WriteLine(ex.ToString());
             }
-
 
         }
 
         private async void AcionarAlarme()
         {
-            var request = new NotificationRequest
+            try
             {
-                NotificationId = 1337,
-                Title = "ALERTA!",
-                Subtitle = "NautilusGuard",
-                Description = "Identificamos um sinal de movimento em seu dispositivo.",
-                BadgeNumber = 42,
-                Schedule = new NotificationRequestSchedule
+                var request = new NotificationRequest
                 {
-                    NotifyTime = DateTime.Now.AddSeconds(1)
+                    NotificationId = 1337,
+                    Title = "ALERTA!",
+                    Subtitle = "SoundAlert",
+                    Description = "Identificamos um sinal sonoro em seu dispositivo.",
+                    BadgeNumber = 42,
+                    Schedule = new NotificationRequestSchedule
+                    {
+                        NotifyTime = DateTime.Now.AddSeconds(1)
+                    }
+                };
+
+                if(await LocalNotificationCenter.Current.Show(request))
+                {
+                    Console.WriteLine("Notification sent.");
                 }
-            };
 
-            LocalNotificationCenter.Current.Show(request);
-
-            _audioPlayer = _audioManager.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("alarm.wav"));
-            _audioPlayer.Play();
+                _audioPlayer = _audioManager.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("alarm.wav"));
+                _audioPlayer.Play();
 
 
 
-            MainThread.BeginInvokeOnMainThread(() =>
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    PulsingIcon.BackgroundColor = Color.FromHex("#FF0000");
+                    _pulsingAnimation.Commit(this, "PulseAnimation", length: 2000, repeat: () => true);
+                });
+            }
+            catch(Exception ex)
             {
-                PulsingIcon.BackgroundColor = Color.FromHex("#FF0000");
-                _pulsingAnimation.Commit(this, "PulseAnimation", length: 2000, repeat: () => true);
-            });
+                Console.WriteLine(ex.ToString());
+            }
 
         }
         private async void OnCounterClicked(object sender, EventArgs e)
@@ -202,7 +272,8 @@ namespace SoundAlert
             try
             {
                 string retorno = await DisplayPromptAsync("Insira o ID do seu dispositivo", "");
-                Task.Run(async () => ConexaoBroker(retorno));
+                if (!string.IsNullOrEmpty(retorno))
+                    await Task.Run(async () => await ConexaoBroker(retorno));
             }
             catch (Exception ex)
             {
@@ -224,7 +295,7 @@ namespace SoundAlert
         {
             try
             {
-                string retorno = await DisplayPromptAsync("Insira o valor limite de aceleração:", "");
+                string retorno = await DisplayPromptAsync("Insira o valor limite de tolerância:", "Recomendado entre 1000 e 1200");
                 _filtro = Convert.ToDouble(retorno);
             }
             catch (Exception ex)

@@ -1,62 +1,97 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SoundAlert.MainPage">
+             xmlns:mct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
+             x:Class="SoundAlert.MainPage"
+             BackgroundColor="White">
 
+    <ContentPage.Behaviors>
+        <mct:StatusBarBehavior StatusBarColor="#f78d43" StatusBarStyle="DarkContent"/>
+    </ContentPage.Behaviors>
+    
     <ScrollView>
-        <VerticalStackLayout
-    Padding="30,0"
-    Spacing="15">
+        <VerticalStackLayout>
 
-            <Image Source="logo.jpg" WidthRequest="360" />
+            <Image Source="logo.png" HorizontalOptions="FillAndExpand" />
 
-            <Label x:Name="LabelDevice"
-                Text="Bem Vindo ao Nautilus Guard!"
-                FontAttributes="Bold"
-                TextColor="DarkBlue"
-                Style="{StaticResource Headline}"
-                FontSize="20"
-                SemanticProperties.HeadingLevel="Level1" />
+            <VerticalStackLayout Padding="30" Spacing="15">
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label x:Name="LabelDevice" Margin="0,0,0,1"
+                        Text="Bem vindo ao "
+                        FontAttributes="Bold"
+                        TextColor="#2777b4"
+                        Style="{StaticResource Headline}"
+                        FontSize="20"
+                        SemanticProperties.HeadingLevel="Level1" 
+                        VerticalTextAlignment="End" />
+                    <Label x:Name="Nome1"
+                        Text="Sound"
+                        FontFamily="Titulo"
+                        FontAttributes="Bold"
+                        TextColor="#f78d43"
+                        Style="{StaticResource Headline}"
+                        FontSize="26"
+                        VerticalTextAlignment="End" 
+                        SemanticProperties.HeadingLevel="Level1" />
+                    <Label x:Name="Nome2"
+                        Text="Alert!"
+                        FontFamily="Titulo"
+                        FontAttributes="Bold"
+                        TextColor="Gray"
+                        Style="{StaticResource Headline}"
+                        FontSize="26"
+                        VerticalTextAlignment="End"
+                        SemanticProperties.HeadingLevel="Level1" />
+                </HorizontalStackLayout>
+                
 
-            <AbsoluteLayout x:Name="AbsoluteLayoutIcone" HorizontalOptions="Center" IsVisible="false">
-                <BoxView x:Name="PulsingIcon" HeightRequest="80" WidthRequest="80" CornerRadius="30" BackgroundColor="Red" >
-                    <BoxView.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
-                    </BoxView.GestureRecognizers>
-                </BoxView>
-                <Label x:Name="Parar" Text="Parar" IsVisible="false" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" FontSize="18" TextColor="White" FontAttributes="Bold"/>
-            </AbsoluteLayout>
+                <AbsoluteLayout x:Name="AbsoluteLayoutIcone" HorizontalOptions="Center" IsVisible="false">
+                    <BoxView x:Name="PulsingIcon" HeightRequest="80" WidthRequest="80" CornerRadius="30" BackgroundColor="Red" >
+                        <BoxView.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+                        </BoxView.GestureRecognizers>
+                    </BoxView>
+                    <Label x:Name="Parar" Text="Parar" IsVisible="false" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" FontSize="18" TextColor="White" FontAttributes="Bold"/>
+                </AbsoluteLayout>
 
-            <AbsoluteLayout x:Name="AbsoluteLayoutConectado" HorizontalOptions="Center" IsVisible="false">
-                <BoxView x:Name="StaticIcon" HeightRequest="80" WidthRequest="80" CornerRadius="30" BackgroundColor="#00ff00" >
-                    <BoxView.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
-                    </BoxView.GestureRecognizers>
-                </BoxView>
-                <Label x:Name="Conectado" Text="Parar" IsVisible="false" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" FontSize="18" TextColor="White" FontAttributes="Bold"/>
-            </AbsoluteLayout>
+                <AbsoluteLayout x:Name="AbsoluteLayoutConectado" HorizontalOptions="Center" IsVisible="false">
+                    <BoxView x:Name="StaticIcon" HeightRequest="80" WidthRequest="80" CornerRadius="30" BackgroundColor="#00ff00" >
+                        <BoxView.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+                        </BoxView.GestureRecognizers>
+                    </BoxView>
+                    <Label x:Name="Conectado" Text="Parar" IsVisible="false" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" FontSize="18" TextColor="White" FontAttributes="Bold"/>
+                </AbsoluteLayout>
 
-            <Label x:Name="LabelDescricao"
-                Text=""
-                TextColor="DarkBlue"
-                Style="{StaticResource Headline}"
-                FontSize="16"
-                SemanticProperties.HeadingLevel="Level1" />
+                <Label x:Name="LabelDescricao"
+                    Text=""
+                    TextColor="DarkBlue"
+                    Style="{StaticResource Headline}"
+                    FontSize="16"
+                    SemanticProperties.HeadingLevel="Level1" />
 
-            <Button
-                x:Name="CounterBtn2"
-                Text="Ajuste de Sensibilidade" 
-                BackgroundColor="DarkBlue"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="CounterBtn_Clicked"
-                HorizontalOptions="Fill" />
-            <Button
-                x:Name="CounterBtn"
-                Text="Configurar Novo Dispositivo" 
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
-                HorizontalOptions="Fill" />
+                <Button
+                    x:Name="CounterBtn2"
+                    Text="Ajuste de Sensibilidade" 
+                    BackgroundColor="#f78d43"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    SemanticProperties.Hint="Counts the number of times you click"
+                    Clicked="CounterBtn_Clicked"
+                    HorizontalOptions="Fill" />
+                <Button
+                    x:Name="CounterBtn"
+                    Text="Configurar Novo Dispositivo" 
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    BackgroundColor="#2777b4"
+                    SemanticProperties.Hint="Counts the number of times you click"
+                    Clicked="OnCounterClicked"
+                    HorizontalOptions="Fill" />
 
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 
