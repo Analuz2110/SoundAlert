@@ -19,7 +19,7 @@ namespace SoundAlert
         private MqttClientConnectResult _connectResult;
         private Animation _pulsingAnimation;
         private bool _tratandoMensagem;
-        private double _filtro = 0.7;
+        private double _filtro = 1200;
         private static bool _isAlarmActive = false;
         private static Stopwatch _alarmTimer = new Stopwatch();
 
