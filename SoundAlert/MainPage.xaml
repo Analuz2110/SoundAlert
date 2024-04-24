@@ -8,7 +8,7 @@
     Padding="30,0"
     Spacing="15">
 
-            <Image Source="logo.jpeg" WidthRequest="360" />
+            <Image Source="logo.jpg" WidthRequest="360" />
 
             <Label x:Name="LabelDevice"
                 Text="Bem Vindo ao Nautilus Guard!"

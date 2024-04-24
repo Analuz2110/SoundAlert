@@ -1,4 +1,15 @@
-﻿namespace SoundAlert
+﻿using Plugin.Maui.Audio;
+using Plugin.LocalNotification;
+using MQTTnet.Client;
+using MQTTnet;
+using MQTTnet.Extensions.ManagedClient;
+using MQTTnet.Server;
+using System.Text;
+using MQTTnet.Protocol;
+using System.Diagnostics;
+using System.Globalization;
+
+namespace SoundAlert
 {
     public partial class MainPage : ContentPage
     {

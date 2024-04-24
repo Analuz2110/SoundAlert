@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
+using Plugin.Maui.Audio;
 
 namespace SoundAlert
 {
