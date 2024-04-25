@@ -45,7 +45,7 @@
                 </HorizontalStackLayout>
                 
 
-                <AbsoluteLayout x:Name="AbsoluteLayoutIcone" HorizontalOptions="Center" IsVisible="false">
+                <AbsoluteLayout x:Name="AbsoluteLayoutIcone" HorizontalOptions="Center" IsVisible="false" Margin="0,20,0,20">
                     <BoxView x:Name="PulsingIcon" HeightRequest="80" WidthRequest="80" CornerRadius="30" BackgroundColor="Red" >
                         <BoxView.GestureRecognizers>
                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
@@ -54,11 +54,8 @@
                     <Label x:Name="Parar" Text="Parar" IsVisible="false" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" FontSize="18" TextColor="White" FontAttributes="Bold"/>
                 </AbsoluteLayout>
 
-                <AbsoluteLayout x:Name="AbsoluteLayoutConectado" HorizontalOptions="Center" IsVisible="false">
+                <AbsoluteLayout x:Name="AbsoluteLayoutConectado" HorizontalOptions="Center" IsVisible="false" Margin="0,20,0,20">
                     <BoxView x:Name="StaticIcon" HeightRequest="80" WidthRequest="80" CornerRadius="30" BackgroundColor="#00ff00" >
-                        <BoxView.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
-                        </BoxView.GestureRecognizers>
                     </BoxView>
                     <Label x:Name="Conectado" Text="Parar" IsVisible="false" AbsoluteLayout.LayoutFlags="PositionProportional" AbsoluteLayout.LayoutBounds="0.5,0.5,-1,-1" FontSize="18" TextColor="White" FontAttributes="Bold"/>
                 </AbsoluteLayout>
@@ -90,6 +87,18 @@
                     SemanticProperties.Hint="Counts the number of times you click"
                     Clicked="OnCounterClicked"
                     HorizontalOptions="Fill" />
+
+                <HorizontalStackLayout>
+                    <Label Margin="0,0,0,0"
+                        Text="Ativar Alarme Sonoro"
+                        FontAttributes="Bold"
+                        TextColor="Gray"
+                        Style="{StaticResource Headline}"
+                        FontSize="20"
+                        SemanticProperties.HeadingLevel="Level1" 
+                        VerticalOptions="Center"/>
+                    <Switch IsToggled="true" Toggled="Switch_Toggled" OnColor="#f78d43" ThumbColor="LightGray" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
 
             </VerticalStackLayout>
         </VerticalStackLayout>

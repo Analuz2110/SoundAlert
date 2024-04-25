@@ -20,8 +20,20 @@ namespace SoundAlert
         private Animation _pulsingAnimation;
         private bool _tratandoMensagem;
         private double _filtro = 1940;
+        private double _valorAcumulado = 0;
+        private double _qtdMedicoes = 0;
+        private double _tolerancia = 10;
+        private double _desvioPadrao = 30;
+        private double _somaVariacoes = 0;
         private static bool _isAlarmActive = false;
         private static Stopwatch _alarmTimer = new Stopwatch();
+
+        bool isAlarmOn = true;
+        public bool IsAlarmOn
+        {
+            get => isAlarmOn;
+            set { isAlarmOn = value; OnPropertyChanged(nameof(IsAlarmOn)); }
+        }
 
         public MainPage(IAudioManager audioManager)
         {
@@ -191,7 +203,30 @@ namespace SoundAlert
                 {
                     var faixa = double.Parse(value, CultureInfo.InvariantCulture);
 
-                    if ((faixa > _filtro + 30 || faixa < _filtro - 30) && !_alarmTimer.IsRunning)
+                    if(_qtdMedicoes < 20)
+                    {
+                        _valorAcumulado += faixa;
+                        _somaVariacoes += Math.Pow(faixa - _filtro, 2);
+                        _qtdMedicoes++;
+                    }
+                    else
+                    {
+                        _desvioPadrao = Math.Sqrt(_somaVariacoes / _qtdMedicoes - 1);
+                        _filtro = _valorAcumulado / _qtdMedicoes;
+
+                        Console.WriteLine($"Filtro: {_filtro}");
+                        Console.WriteLine($"Desvio padrão: {_desvioPadrao}");
+                        Console.WriteLine($"Tolerância: {_tolerancia}");
+                        Console.WriteLine($"Soma das variações: {_somaVariacoes}");
+                        Console.WriteLine($"Qtd de medições: {_qtdMedicoes}");
+                        Console.WriteLine($"Valor acumulado: {_valorAcumulado}");
+
+                        _somaVariacoes = 0;
+                        _valorAcumulado = 0;
+                        _qtdMedicoes = 0;
+                    }
+
+                    if ((faixa > _filtro + _desvioPadrao + _tolerancia || faixa < _filtro - _desvioPadrao - _tolerancia) && !_alarmTimer.IsRunning)
                     {
                         AcionarAlarme();
 
@@ -250,10 +285,12 @@ namespace SoundAlert
                     Console.WriteLine("Notification sent.");
                 }
 
-                _audioPlayer = _audioManager.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("alarm.wav"));
-                _audioPlayer.Play();
-
-
+                if (IsAlarmOn) 
+                {
+                    _audioPlayer = _audioManager.CreatePlayer(await FileSystem.OpenAppPackageFileAsync("alarm.wav"));
+                    _audioPlayer.Play();
+                }
+                
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -284,25 +321,54 @@ namespace SoundAlert
 
         private void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
         {
-            if (_audioPlayer != null)
+            try
             {
-                _audioPlayer.Stop();
-            }
+                if(_audioPlayer != null && IsAlarmOn)
+                {
+                    _audioPlayer.Stop();
+                } 
+                _isAlarmActive = false;
+                _alarmTimer.Stop();
+                _alarmTimer.Reset();
+                Console.WriteLine("Desativado manualmente");
 
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    LabelDescricao.Text = "Dispositivo conectado com suceso.";
+                    _pulsingAnimation.Pause();
+                    AbsoluteLayoutIcone.IsVisible = false;
+                    AbsoluteLayoutConectado.IsVisible = true;
+                    Parar.IsVisible = false;
+                });
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
         private async void CounterBtn_Clicked(object sender, EventArgs e)
         {
             try
             {
-                string retorno = await DisplayPromptAsync("Insira o valor limite de tolerância:", "Recomendado entre 1000 e 1200");
-                _filtro = Convert.ToDouble(retorno);
+                string retorno = await DisplayPromptAsync("Insira o valor limite de tolerância:", "Recomendado: 10");
+                _tolerancia = Convert.ToDouble(retorno);
             }
             catch (Exception ex)
             {
 
             }
 
+        }
+
+        private void Switch_Toggled(object sender, ToggledEventArgs e)
+        {
+            IsAlarmOn = !IsAlarmOn;
+
+            if(!IsAlarmOn && _audioPlayer != null)
+            {
+                _audioPlayer.Stop();
+            }
         }
     }
 
