@@ -3,13 +3,13 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-#define alimentacao 17
-#define sensor 15
+#define alimentacao 5
+#define sensor 34 
 
 // Configurações do LED RGB
-#define red 19  // Pino do canal vermelho
-#define green 18   // Pino do canal verde
-#define blue 5   // Pino do canal azul
+#define red 21  // Pino do canal vermelho
+#define green 19   // Pino do canal verde
+#define blue 18  // Pino do canal azul
 
 const unsigned long duration = 60000;  // 60 seconds in milliseconds
 unsigned long startTime;
@@ -20,7 +20,7 @@ const char *password = "analuz2110";  // Enter WiFi password
 
 // MQTT Broker
 const char *mqtt_broker = "broker.emqx.io"; // broker address
-const char *topic = "ufabc/nautilusguard"; // define topic 
+const char *topic = "ufabc/soundalert"; // define topic 
 const char *mqtt_username = "emqx"; // username for authentication
 const char *mqtt_password = "public"; // password for authentication
 const int mqtt_port = 1883; // port of MQTT over TCP
@@ -31,6 +31,7 @@ PubSubClient client(espClient);
 void setup() {
   // Set the GPIO pin to OUTPUT mode
   pinMode(alimentacao, OUTPUT);
+  //pinMode(sensor, INPUT);
   pinMode(red, OUTPUT);//Define a variável azul como saída
   pinMode(green, OUTPUT);//Define a variável verde como saída
   pinMode (blue, OUTPUT);//Define a variável vermelho como saída
@@ -50,22 +51,23 @@ void setup() {
   setup_wifi();
 
   // publish and subscribe
-  client.publish(topic, "soudalert"); // publish to the topic
+  client.publish(topic, "soundalert"); // publish to the topic
   client.subscribe(topic); // subscribe from the topic
 }
 
 void loop() {
 
   int sensorValue = analogRead(sensor); // Replace A0 with your ADC pin (e.g., ADC1_CH0 or ADC2_CH0)
-  Serial.println(sensorValue);
+  //Serial.println(sensorValue);
 
-  char payload[10]; // Buffer to hold the sensor value as a string
-  snprintf(payload, sizeof(payload), "%d", sensorValue); // Convert int to string
+  String result = String(sensorValue);
+  Serial.println(result);
+  //char payload[10]; // Buffer to hold the sensor value as a string
+  //snprintf(payload, sizeof(payload), "%d", sensorValue); // Convert int to string
 
-  client.loop(); // Maintain MQTT connection
-
+  //Serial.println(payload);
     // Publish sensor value to MQTT topic
-  client.publish("sensor/ky037", payload);
+  client.publish(topic, result.c_str());
 
   delay(1000); // Adjust delay as needed
 
